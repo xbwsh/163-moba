@@ -4,18 +4,18 @@
 */
 
 /*
-  色彩台账（相对 WCAG 对比度，底色 --bg #0e0e10 L≈0.0044）
-  用途 | 色值 | 对比度 | 与品牌关系
-  正文 ink | #e8e6e1 | ≈15.9:1 | 中性基底，不绑定品牌
-  次要 ink-2 | #9a9892 | ≈6.7:1 | 中性基底
-  弱化 ink-3 | #86847f | ≥4.55:1（bg/surface/surface-2） | 中性基底（已提亮至全场景 ≥4.5）
-  品牌朱红 red | #c43c2e | ≈3.7:1 | 平安京朱印；仅用于描边/选中条（非小字）
-  可读朱红 red-text | #e05a4a | ≈5.3:1 | 品牌朱红的浅化，用于印章文字
-  鎏金 gold | #b8943e | ≈6.7:1 | 平安京金色点缀，用于强调数据/排序
-  成功 good | #3a9e72 | ≈5.4:1（对 --surface） | 语义色，非品牌色
-  中性告警 mid | #a6843c | ≈5.2:1 | 语义色，略偏金但独立
-  错误 bad | #d66a68 | ≈5.3:1 | 语义色，非品牌色
-  奖牌 rank-2/3 | #9a9ea8 / #9e784c | ≥4.5:1（对 --surface） | 中性银/铜，非品牌色
+  色彩台账（WCAG 对比度 ≥4.5 文字 / ≥3 UI）
+  用途 | 暗色值 | 浅色值 | 品牌关系
+  正文 ink | #e8e6e1 | #1a1917 | 中性
+  次要 ink-2 | #9a9892 | #4a4742 | 中性
+  弱化 ink-3 | #86847f | #5f5c56 | 中性（双主题均 ≥4.5）
+  朱红 red | #c43c2e | #b83226 | 平安京朱印（描边/选中）
+  可读朱红 | #e05a4a | #99241a | 品牌朱红明/暗可读变体
+  鎏金 gold | #b8943e | #7a5c14 | 平安京金
+  成功 good | #3a9e72 | #176544 | 语义色
+  中性 mid | #a6843c | #7a5c14 | 语义色
+  错误 bad | #d66a68 | #b03030 | 语义色
+  奖牌 2/3 | #9a9ea8/#aa8258 | #5c6068/#7a5530 | 中性银/铜
 */
 
 :root {
@@ -33,7 +33,7 @@
   --red-dim: rgba(196, 60, 46, 0.16);
   --gold: #b8943e;
   --rank-2: #9a9ea8;
-  --rank-3: #9e784c;
+  --rank-3: #aa8258;
   --good: #3a9e72;
   --mid: #a6843c;
   --bad: #d66a68;
@@ -43,6 +43,32 @@
   --font: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
   --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   --page-max: 60rem;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f3f0e9;
+  --surface: #ffffff;
+  --surface-2: #ebe7df;
+  --line: #d4cfc4;
+  --line-soft: #e2ddd4;
+  --line-hover: #b8b2a6;
+  --ink: #1a1917;
+  --ink-2: #4a4742;
+  --ink-3: #5f5c56;
+  --red: #b83226;
+  --red-text: #99241a;
+  --red-dim: rgba(184, 50, 38, 0.12);
+  --gold: #7a5c14;
+  --rank-2: #5c6068;
+  --rank-3: #7a5530;
+  --good: #176544;
+  --mid: #7a5c14;
+  --bad: #b03030;
+  --hover: rgba(0, 0, 0, 0.04);
+  --track: rgba(0, 0, 0, 0.08);
+  --scrim: rgba(0, 0, 0, 0.45);
+  color-scheme: light;
 }
 
 *,
@@ -158,6 +184,32 @@ img {
   font-family: var(--mono);
   font-size: 0.75rem;
   color: var(--ink-3);
+}
+
+.theme-toggle {
+  inline-size: 2rem;
+  block-size: 2rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--line-hover);
+  background: var(--surface-2);
+  color: var(--ink);
+  outline: none;
+}
+
+.theme-icon {
+  display: block;
+  transform: translateY(-0.5px);
 }
 
 .mode-select {

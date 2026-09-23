@@ -2,12 +2,1104 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>决战！平安京 · 式神强度榜</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>式神强度榜 · App</title>
+  <meta name="theme-color" content="#0e0e10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <style>
+/* 平安京式神强度榜
+   布局：无 table / 无内联样式；响应式以 container query 为主
+   滚动：垂直滚动条全局隐藏（仍可滚动）
+*/
+
+/*
+  色彩台账（WCAG 对比度 ≥4.5 文字 / ≥3 UI）
+  用途 | 暗色值 | 浅色值 | 品牌关系
+  正文 ink | #e8e6e1 | #1a1917 | 中性
+  次要 ink-2 | #9a9892 | #4a4742 | 中性
+  弱化 ink-3 | #86847f | #5f5c56 | 中性（双主题均 ≥4.5）
+  朱红 red | #c43c2e | #b83226 | 平安京朱印（描边/选中）
+  可读朱红 | #e05a4a | #99241a | 品牌朱红明/暗可读变体
+  鎏金 gold | #b8943e | #7a5c14 | 平安京金
+  成功 good | #3a9e72 | #176544 | 语义色
+  中性 mid | #a6843c | #7a5c14 | 语义色
+  错误 bad | #d66a68 | #b03030 | 语义色
+  奖牌 2/3 | #9a9ea8/#aa8258 | #5c6068/#7a5530 | 中性银/铜
+*/
+
+:root {
+  --bg: #0e0e10;
+  --surface: #161618;
+  --surface-2: #1c1c1f;
+  --line: #2a2a2e;
+  --line-soft: #222226;
+  --line-hover: #44444a;
+  --ink: #e8e6e1;
+  --ink-2: #9a9892;
+  --ink-3: #86847f;
+  --red: #c43c2e;
+  --red-text: #e05a4a;
+  --red-dim: rgba(196, 60, 46, 0.16);
+  --gold: #b8943e;
+  --rank-2: #9a9ea8;
+  --rank-3: #aa8258;
+  --good: #3a9e72;
+  --mid: #a6843c;
+  --bad: #d66a68;
+  --hover: rgba(255, 255, 255, 0.035);
+  --track: rgba(255, 255, 255, 0.07);
+  --scrim: rgba(0, 0, 0, 0.62);
+  --font: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  --page-max: 60rem;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #f3f0e9;
+  --surface: #ffffff;
+  --surface-2: #ebe7df;
+  --line: #d4cfc4;
+  --line-soft: #e2ddd4;
+  --line-hover: #b8b2a6;
+  --ink: #1a1917;
+  --ink-2: #4a4742;
+  --ink-3: #5f5c56;
+  --red: #b83226;
+  --red-text: #99241a;
+  --red-dim: rgba(184, 50, 38, 0.12);
+  --gold: #7a5c14;
+  --rank-2: #5c6068;
+  --rank-3: #7a5530;
+  --good: #176544;
+  --mid: #7a5c14;
+  --bad: #b03030;
+  --hover: rgba(0, 0, 0, 0.04);
+  --track: rgba(0, 0, 0, 0.08);
+  --scrim: rgba(0, 0, 0, 0.45);
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 右侧（及各容器）滚动条始终隐藏 */
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+body {
+  margin: 0;
+  min-block-size: 100dvh;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+body.is-locked {
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-inline-size: 100%;
+}
+
+/* body 作为容器根：覆盖抽屉等 page 外节点 */
+body {
+  container-type: inline-size;
+  container-name: page;
+}
+
+.page {
+  inline-size: min(var(--page-max), calc(100% - 1.75rem));
+  margin-inline: auto;
+  padding-block: 1.25rem 2.5rem;
+}
+
+/* Header */
+
+.site-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.875rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-inline-size: 0;
+}
+
+.brand-seal {
+  inline-size: 2.125rem;
+  block-size: 2.125rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--red);
+  color: var(--red-text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.brand-game {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+.brand-text h1 {
+  margin: 0.0625rem 0 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.meta-date {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.theme-toggle {
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--ink-2);
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--line-hover);
+  background: var(--surface-2);
+  color: var(--ink);
+  outline: none;
+}
+
+.theme-toggle:active {
+  background: var(--red-dim);
+}
+
+.theme-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+.theme-icon svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 按当前主题显示对应图标：深色显示月，浅色显示日 */
+.theme-icon .icon-sun {
+  display: none;
+}
+
+[data-theme="light"] .theme-icon .icon-moon {
+  display: none;
+}
+
+[data-theme="light"] .theme-icon .icon-sun {
+  display: block;
+}
+
+.mode-select {
+  position: relative;
+  /* 与触发按钮同宽：菜单按此定位 */
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+  min-inline-size: 6.75rem;
+  min-block-size: 2.75rem;
+  padding: 0.4375rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  justify-content: space-between;
+}
+
+.mode-trigger:hover,
+.mode-trigger[aria-expanded="true"] {
+  border-color: var(--line-hover);
+  background: var(--surface-2);
+}
+
+.mode-caret {
+  inline-size: 0;
+  block-size: 0;
+  border-left: 0.25rem solid transparent;
+  border-right: 0.25rem solid transparent;
+  border-top: 0.3125rem solid var(--ink-3);
+  flex-shrink: 0;
+}
+
+.mode-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  inset-inline: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  inline-size: 100%;
+  min-inline-size: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.mode-menu[hidden] {
+  display: none;
+}
+
+.mode-menu li {
+  padding: 0.5rem 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.mode-menu li:hover,
+.mode-menu li.is-active {
+  background: var(--red-dim);
+  color: var(--ink);
+}
+
+/* Board toolbar */
+
+.board-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.625rem;
+}
+
+.role-tabs {
+  display: flex;
+  gap: 0.125rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.role-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.role-tab {
+  flex: 0 0 auto;
+  min-inline-size: 2.5rem;
+  padding: 0.4375rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  border-bottom: 2px solid transparent;
+}
+
+.role-tab:hover {
+  color: var(--ink);
+}
+
+.role-tab.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--red);
+  font-weight: 600;
+}
+
+.board-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.board-meta b {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.board-meta i {
+  font-style: normal;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.board-meta .sep {
+  opacity: 0.5;
+}
+
+/* Table（CSS Grid，非 table 布局） */
+
+.table-shell {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.table-head,
+.rank-row {
+  display: grid;
+  grid-template-columns:
+    minmax(2rem, 3rem)
+    minmax(9.5rem, 1.5fr)
+    repeat(4, minmax(4.5rem, 1fr));
+  gap: 0.5rem;
+  align-items: center;
+  padding-inline: 0.875rem;
+}
+
+.table-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-block-size: 2.375rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.col-sort {
+  text-align: end;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  padding: 0.625rem 0;
+}
+
+.col-sort:hover {
+  color: var(--ink);
+}
+
+.col-sort.is-asc,
+.col-sort.is-desc {
+  color: var(--gold);
+}
+
+.col-sort.is-asc::after {
+  content: " ↑";
+}
+
+.col-sort.is-desc::after {
+  content: " ↓";
+}
+
+.table-body {
+  max-block-size: 48rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.table-body::-webkit-scrollbar {
+  display: none;
+}
+
+.loading-state,
+.empty-state,
+.error-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+
+.error-state {
+  color: var(--bad);
+}
+
+.rank-row {
+  min-block-size: 4rem;
+  padding-block: 0.5rem;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.rank-row:last-child {
+  border-bottom: 0;
+}
+
+.rank-row:hover,
+.rank-row:focus-visible {
+  background: var(--hover);
+  outline: none;
+}
+
+.col-rank {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.rank-row[data-rank="1"] .col-rank { color: var(--gold); }
+.rank-row[data-rank="2"] .col-rank { color: var(--rank-2); }
+.rank-row[data-rank="3"] .col-rank { color: var(--rank-3); }
+
+.col-hero {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-inline-size: 0;
+}
+
+.hero-avatar {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: 0.1875rem;
+  object-fit: cover;
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+
+.hero-avatar.is-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  font-size: 0.75rem;
+  border: 1px solid var(--line);
+}
+
+.hero-meta {
+  min-inline-size: 0;
+}
+
+.hero-name {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-sub {
+  margin: 0.125rem 0 0;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-sub .role-pill {
+  display: inline-block;
+  min-inline-size: 1.3em;
+  margin-inline-end: 0.3125rem;
+  padding-inline: 0.1875rem;
+  color: var(--gold);
+  font-weight: 600;
+  text-align: center;
+}
+
+.metric-cell {
+  text-align: end;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.win-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3125rem;
+}
+
+.win-bar {
+  inline-size: 100%;
+  block-size: 0.1875rem;
+  background: var(--track);
+  overflow: hidden;
+}
+
+/* 宽度由 data-w 驱动，避免 style 属性 */
+.win-bar > i {
+  display: block;
+  block-size: 100%;
+  inline-size: 0;
+  background: var(--mid);
+  transition: inline-size 0.55s ease;
+}
+
+.win-bar.tone-high > i { background: var(--good); }
+.win-bar.tone-mid > i { background: var(--mid); }
+.win-bar.tone-low > i { background: var(--bad); }
+
+.win-bar > i[data-w="0"] { inline-size: 0%; }
+.win-bar > i[data-w="1"] { inline-size: 1%; }
+.win-bar > i[data-w="2"] { inline-size: 2%; }
+.win-bar > i[data-w="3"] { inline-size: 3%; }
+.win-bar > i[data-w="4"] { inline-size: 4%; }
+.win-bar > i[data-w="5"] { inline-size: 5%; }
+.win-bar > i[data-w="6"] { inline-size: 6%; }
+.win-bar > i[data-w="7"] { inline-size: 7%; }
+.win-bar > i[data-w="8"] { inline-size: 8%; }
+.win-bar > i[data-w="9"] { inline-size: 9%; }
+.win-bar > i[data-w="10"] { inline-size: 10%; }
+.win-bar > i[data-w="11"] { inline-size: 11%; }
+.win-bar > i[data-w="12"] { inline-size: 12%; }
+.win-bar > i[data-w="13"] { inline-size: 13%; }
+.win-bar > i[data-w="14"] { inline-size: 14%; }
+.win-bar > i[data-w="15"] { inline-size: 15%; }
+.win-bar > i[data-w="16"] { inline-size: 16%; }
+.win-bar > i[data-w="17"] { inline-size: 17%; }
+.win-bar > i[data-w="18"] { inline-size: 18%; }
+.win-bar > i[data-w="19"] { inline-size: 19%; }
+.win-bar > i[data-w="20"] { inline-size: 20%; }
+.win-bar > i[data-w="21"] { inline-size: 21%; }
+.win-bar > i[data-w="22"] { inline-size: 22%; }
+.win-bar > i[data-w="23"] { inline-size: 23%; }
+.win-bar > i[data-w="24"] { inline-size: 24%; }
+.win-bar > i[data-w="25"] { inline-size: 25%; }
+.win-bar > i[data-w="26"] { inline-size: 26%; }
+.win-bar > i[data-w="27"] { inline-size: 27%; }
+.win-bar > i[data-w="28"] { inline-size: 28%; }
+.win-bar > i[data-w="29"] { inline-size: 29%; }
+.win-bar > i[data-w="30"] { inline-size: 30%; }
+.win-bar > i[data-w="31"] { inline-size: 31%; }
+.win-bar > i[data-w="32"] { inline-size: 32%; }
+.win-bar > i[data-w="33"] { inline-size: 33%; }
+.win-bar > i[data-w="34"] { inline-size: 34%; }
+.win-bar > i[data-w="35"] { inline-size: 35%; }
+.win-bar > i[data-w="36"] { inline-size: 36%; }
+.win-bar > i[data-w="37"] { inline-size: 37%; }
+.win-bar > i[data-w="38"] { inline-size: 38%; }
+.win-bar > i[data-w="39"] { inline-size: 39%; }
+.win-bar > i[data-w="40"] { inline-size: 40%; }
+.win-bar > i[data-w="41"] { inline-size: 41%; }
+.win-bar > i[data-w="42"] { inline-size: 42%; }
+.win-bar > i[data-w="43"] { inline-size: 43%; }
+.win-bar > i[data-w="44"] { inline-size: 44%; }
+.win-bar > i[data-w="45"] { inline-size: 45%; }
+.win-bar > i[data-w="46"] { inline-size: 46%; }
+.win-bar > i[data-w="47"] { inline-size: 47%; }
+.win-bar > i[data-w="48"] { inline-size: 48%; }
+.win-bar > i[data-w="49"] { inline-size: 49%; }
+.win-bar > i[data-w="50"] { inline-size: 50%; }
+.win-bar > i[data-w="51"] { inline-size: 51%; }
+.win-bar > i[data-w="52"] { inline-size: 52%; }
+.win-bar > i[data-w="53"] { inline-size: 53%; }
+.win-bar > i[data-w="54"] { inline-size: 54%; }
+.win-bar > i[data-w="55"] { inline-size: 55%; }
+.win-bar > i[data-w="56"] { inline-size: 56%; }
+.win-bar > i[data-w="57"] { inline-size: 57%; }
+.win-bar > i[data-w="58"] { inline-size: 58%; }
+.win-bar > i[data-w="59"] { inline-size: 59%; }
+.win-bar > i[data-w="60"] { inline-size: 60%; }
+.win-bar > i[data-w="61"] { inline-size: 61%; }
+.win-bar > i[data-w="62"] { inline-size: 62%; }
+.win-bar > i[data-w="63"] { inline-size: 63%; }
+.win-bar > i[data-w="64"] { inline-size: 64%; }
+.win-bar > i[data-w="65"] { inline-size: 65%; }
+.win-bar > i[data-w="66"] { inline-size: 66%; }
+.win-bar > i[data-w="67"] { inline-size: 67%; }
+.win-bar > i[data-w="68"] { inline-size: 68%; }
+.win-bar > i[data-w="69"] { inline-size: 69%; }
+.win-bar > i[data-w="70"] { inline-size: 70%; }
+.win-bar > i[data-w="71"] { inline-size: 71%; }
+.win-bar > i[data-w="72"] { inline-size: 72%; }
+.win-bar > i[data-w="73"] { inline-size: 73%; }
+.win-bar > i[data-w="74"] { inline-size: 74%; }
+.win-bar > i[data-w="75"] { inline-size: 75%; }
+.win-bar > i[data-w="76"] { inline-size: 76%; }
+.win-bar > i[data-w="77"] { inline-size: 77%; }
+.win-bar > i[data-w="78"] { inline-size: 78%; }
+.win-bar > i[data-w="79"] { inline-size: 79%; }
+.win-bar > i[data-w="80"] { inline-size: 80%; }
+.win-bar > i[data-w="81"] { inline-size: 81%; }
+.win-bar > i[data-w="82"] { inline-size: 82%; }
+.win-bar > i[data-w="83"] { inline-size: 83%; }
+.win-bar > i[data-w="84"] { inline-size: 84%; }
+.win-bar > i[data-w="85"] { inline-size: 85%; }
+.win-bar > i[data-w="86"] { inline-size: 86%; }
+.win-bar > i[data-w="87"] { inline-size: 87%; }
+.win-bar > i[data-w="88"] { inline-size: 88%; }
+.win-bar > i[data-w="89"] { inline-size: 89%; }
+.win-bar > i[data-w="90"] { inline-size: 90%; }
+.win-bar > i[data-w="91"] { inline-size: 91%; }
+.win-bar > i[data-w="92"] { inline-size: 92%; }
+.win-bar > i[data-w="93"] { inline-size: 93%; }
+.win-bar > i[data-w="94"] { inline-size: 94%; }
+.win-bar > i[data-w="95"] { inline-size: 95%; }
+.win-bar > i[data-w="96"] { inline-size: 96%; }
+.win-bar > i[data-w="97"] { inline-size: 97%; }
+.win-bar > i[data-w="98"] { inline-size: 98%; }
+.win-bar > i[data-w="99"] { inline-size: 99%; }
+.win-bar > i[data-w="100"] { inline-size: 100%; }
+
+/* Footer */
+
+.site-footer {
+  margin-top: 1.125rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-3);
+  font-size: 0.75rem;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+/* Drawer */
+
+.detail-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.detail-drawer[hidden] {
+  display: none;
+}
+
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+}
+
+.drawer-panel {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  inline-size: min(25rem, 100%);
+  block-size: 100%;
+  padding: 1.25rem 1.125rem 1.75rem;
+  overflow-y: auto;
+  background: var(--surface);
+  border-inline-start: 1px solid var(--line);
+  scrollbar-width: none;
+}
+
+.drawer-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.drawer-close {
+  position: absolute;
+  top: 0.625rem;
+  inset-inline-end: 0.75rem;
+  inline-size: 2rem;
+  block-size: 2rem;
+  color: var(--ink-3);
+  font-size: 1.375rem;
+  line-height: 1;
+}
+
+.drawer-close:hover {
+  color: var(--ink);
+}
+
+.drawer-head {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-inline-end: 2.25rem;
+}
+
+.drawer-head img {
+  inline-size: 4rem;
+  block-size: 4rem;
+  border-radius: 0.25rem;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.drawer-roles {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: var(--gold);
+}
+
+.drawer-head h2 {
+  margin: 0.125rem 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.drawer-lane {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.drawer-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  margin-bottom: 1.125rem;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.drawer-metrics .m-card {
+  padding: 0.625rem 0.75rem;
+  background: var(--surface-2);
+}
+
+.drawer-metrics .m-card span {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
+  margin-bottom: 0.25rem;
+}
+
+.drawer-metrics .m-card strong {
+  font-family: var(--mono);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.drawer-attrs h3 {
+  margin: 0 0 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+}
+
+.drawer-attrs ul {
+  list-style: none;
+  margin: 0 0 0.875rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.drawer-attrs li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  background: var(--surface-2);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.drawer-attrs li b {
+  font-family: var(--mono);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.drawer-tags {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+.drawer-bio {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+/* 桌面默认显示列内指标；窄容器切换为底部汇总 */
+.mobile-metrics {
+  display: none;
+}
+
+/* Container queries — 随 .page 宽度响应，无 viewport 断点硬编码 */
+@container page (max-width: 51.25rem) {
+  .table-head,
+  .rank-row {
+    grid-template-columns:
+      minmax(2rem, 2.5rem)
+      minmax(7.5rem, 1.3fr)
+      repeat(4, minmax(3.625rem, 1fr));
+    padding-inline: 0.625rem;
+    gap: 0.25rem;
+  }
+
+  .hero-avatar {
+    inline-size: 2.125rem;
+    block-size: 2.125rem;
+  }
+
+  .metric-cell {
+    font-size: 0.75rem;
+  }
+}
+
+@container page (max-width: 40rem) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .header-meta {
+    inline-size: 100%;
+    justify-content: space-between;
+  }
+
+  .table-head {
+    display: none;
+  }
+
+  .rank-row {
+    grid-template-columns: 2rem 1fr;
+    grid-template-areas:
+      "rank hero"
+      ". metrics";
+    row-gap: 0.375rem;
+    min-block-size: 0;
+    padding-block: 0.75rem;
+  }
+
+  .col-rank {
+    grid-area: rank;
+    align-self: start;
+    padding-top: 0.625rem;
+  }
+
+  .col-hero {
+    grid-area: hero;
+  }
+
+  .rank-row > .metric-cell {
+    display: none;
+  }
+
+  .rank-row .mobile-metrics {
+    grid-area: metrics;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.375rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .mobile-metrics .mm {
+    text-align: center;
+  }
+
+  .mobile-metrics .mm span {
+    display: block;
+    font-size: 0.625rem;
+    color: var(--ink-3);
+    margin-bottom: 0.125rem;
+  }
+
+  .mobile-metrics .mm b {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .mobile-metrics .mm b.high { color: var(--good); }
+  .mobile-metrics .mm b.mid { color: var(--mid); }
+  .mobile-metrics .mm b.low { color: var(--bad); }
+}
+
+
+/* ===== App shell / mobile enhancements ===== */
+html, body {
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.page {
+  padding-top: calc(1rem + env(safe-area-inset-top));
+}
+
+.role-tab,
+.theme-toggle,
+.mode-trigger,
+.col-sort,
+.drawer-close {
+  min-block-size: 2.75rem; /* 44px touch target */
+}
+
+.theme-toggle {
+  border-radius: 0.5rem;
+}
+
+.role-tab {
+  padding: 0.75rem 0.9rem;
+}
+
+.mode-trigger {
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.5rem;
+}
+
+/* 窄屏页头：日期与操作分两行，避免按钮挤在一起 */
+@container page (max-width: 40rem) {
+  .header-meta {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "date date"
+      "mode theme";
+    align-items: center;
+    gap: 0.5rem 0.625rem;
+    inline-size: 100%;
+    justify-content: stretch;
+  }
+
+  .meta-date {
+    grid-area: date;
+    justify-self: start;
+  }
+
+  .mode-select {
+    grid-area: mode;
+    justify-self: stretch;
+  }
+
+  .mode-trigger {
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .theme-toggle {
+    grid-area: theme;
+    justify-self: end;
+  }
+}
+
+.table-body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* App-like bottom sheet on narrow containers */
+@container page (max-width: 40rem) {
+  .drawer-panel {
+    top: auto;
+    bottom: 0;
+    inset-inline: 0;
+    inline-size: 100%;
+    block-size: min(86dvh, 42rem);
+    border-inline-start: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 1rem 1rem 0 0;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.35);
+  }
+
+  .drawer-backdrop {
+    background: rgba(0,0,0,0.55);
+  }
+
+  .board-meta {
+    font-size: 0.6875rem;
+  }
+
+  .meta-date {
+    font-size: 0.6875rem;
+  }
+
+  .site-footer {
+    text-align: center;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+  </style>
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("theme");
+        var t = saved === "light" || saved === "dark"
+          ? saved
+          : window.matchMedia("(prefers-color-scheme: light)").matches
+            ? "light"
+            : "dark";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
 </head>
 <body>
-  <div class="page">
+<div class="page">
     <header class="site-header">
       <div class="brand">
         <span class="brand-seal" aria-hidden="true">京</span>
@@ -18,6 +1110,23 @@
       </div>
       <div class="header-meta">
         <span class="meta-date" id="dateChip">——</span>
+        <button
+          type="button"
+          class="theme-toggle"
+          id="themeToggle"
+          aria-label="切换浅色模式"
+          title="切换浅色/深色"
+        >
+          <span class="theme-icon" aria-hidden="true">
+            <svg class="icon-moon" viewBox="0 0 24 24" focusable="false">
+              <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5z" />
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" focusable="false">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" />
+            </svg>
+          </span>
+        </button>
         <div class="mode-select" id="modeSelect">
           <button class="mode-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" id="modeTrigger">
             <span class="mode-label">全部模式</span>
@@ -96,6 +1205,618 @@
     </div>
   </aside>
 
-  <script src="app.js"></script>
+  
+  <script>
+(function () {
+  "use strict";
+
+  var API_HOST = "https://comp-sync.webapp.163.com";
+  var MODE_LABELS = {
+    "-127": "全部模式",
+    noban: "常规模式",
+    ban_3: "禁选模式",
+    ban_4: "迷雾模式",
+  };
+
+  var state = {
+    mode: localStorage.getItem("mode") || "-127",
+    role: "全",
+    sortKey: "win_rate",
+    sortDir: "desc",
+    heroesById: {},
+    picPaths: {},
+    rows: [],
+    stats: {},
+  };
+
+  var els = {
+    dateChip: document.getElementById("dateChip"),
+    themeToggle: document.getElementById("themeToggle"),
+    themeIcon: document.querySelector("#themeToggle .theme-icon"),
+    modeTrigger: document.getElementById("modeTrigger"),
+    modeMenu: document.getElementById("modeMenu"),
+    modeLabel: document.querySelector("#modeTrigger .mode-label"),
+    roleTabs: document.getElementById("roleTabs"),
+    resultCount: document.getElementById("resultCount"),
+    rankList: document.getElementById("rankList"),
+    statAvgWin: document.getElementById("statAvgWin"),
+    statTopWin: document.getElementById("statTopWin"),
+    statTopHero: document.getElementById("statTopHero"),
+    detailDrawer: document.getElementById("detailDrawer"),
+    drawerAvatar: document.getElementById("drawerAvatar"),
+    drawerRoles: document.getElementById("drawerRoles"),
+    drawerTitle: document.getElementById("drawerTitle"),
+    drawerLane: document.getElementById("drawerLane"),
+    drawerMetrics: document.getElementById("drawerMetrics"),
+    drawerAttrs: document.getElementById("drawerAttrs"),
+    drawerTags: document.getElementById("drawerTags"),
+    drawerBio: document.getElementById("drawerBio"),
+  };
+
+  /* ---------- JSONP ---------- */
+
+  var jsonpSeq = 0;
+
+  function jsonp(url, params) {
+    return new Promise(function (resolve, reject) {
+      var cbName = "__moba_jsonp_" + Date.now() + "_" + jsonpSeq++;
+      var script = document.createElement("script");
+      var cleaned = false;
+      var timer = null;
+
+      var query = [];
+      var merged = Object.assign({ callback: cbName }, params || {});
+      Object.keys(merged).forEach(function (k) {
+        if (merged[k] === undefined || merged[k] === null) return;
+        query.push(encodeURIComponent(k) + "=" + encodeURIComponent(merged[k]));
+      });
+
+      function cleanup() {
+        if (cleaned) return;
+        cleaned = true;
+        clearTimeout(timer);
+        try {
+          delete window[cbName];
+        } catch (e) {
+          window[cbName] = undefined;
+        }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cbName] = function (payload) {
+        cleanup();
+        resolve(payload);
+      };
+
+      script.onerror = function () {
+        cleanup();
+        reject(new Error("JSONP request failed: " + url));
+      };
+
+      timer = setTimeout(function () {
+        cleanup();
+        reject(new Error("JSONP timeout: " + url));
+      }, 15000);
+
+      script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + query.join("&");
+      document.head.appendChild(script);
+    });
+  }
+
+  /* ---------- data ---------- */
+
+  function loadBase() {
+    var heroP = jsonp(API_HOST + "/g78_hero/free_convey").then(function (res) {
+      var data = (res && res.data) || {};
+      var map = {};
+      Object.keys(data).forEach(function (name) {
+        var h = data[name];
+        if (h && h["式神ID"] != null) map[String(h["式神ID"])] = h;
+      });
+      state.heroesById = map;
+      return map;
+    });
+
+    var picsP = jsonp(API_HOST + "/g78_pics/api").then(function (res) {
+      state.picPaths = (res && res.path_dict) || {};
+      return state.picPaths;
+    });
+
+    return Promise.all([heroP, picsP]);
+  }
+
+  function loadRank(mode) {
+    return jsonp(API_HOST + "/g78_op_stat_hero_rank_new_v2/free_convey", {
+      hero_type: "",
+      limit: 200,
+      mode: mode,
+    }).then(function (res) {
+      var list = (res && res.data) || [];
+      var rows = [];
+      var dateid = "";
+      var winSum = 0;
+      var topWin = 0;
+      var topHero = null;
+
+      list.forEach(function (r) {
+        var hero = state.heroesById[String(r.hero_id)];
+        if (!hero) return;
+        if (!dateid) dateid = r.dateid || "";
+
+        var iconPath =
+          hero["式神方头像_新"] || hero["式神方头像"] || hero["式神圆头像_新"] || hero["式神圆头像"];
+        var avatar = state.picPaths[iconPath] || iconPath || "";
+
+        var row = {
+          hero_id: String(r.hero_id),
+          name: hero["式神名称"],
+          roles: hero["式神定位"] || [],
+          lane: hero["推荐分路"] || "",
+          tags: hero["式神标签"] || "",
+          bio: (hero["式神传记"] || "").replace(/#r/g, "\n"),
+          attrs: hero["式神基础属性"] || {},
+          avatar: avatar,
+          win_rate: Number(r.win_rate) || 0,
+          battle_rate: Number(r.battle_rate) || 0,
+          kda: Number(r.kda) || 0,
+          avg_kill_cnt: Number(r.avg_kill_cnt) || 0,
+          dateid: r.dateid || "",
+        };
+
+        winSum += row.win_rate;
+        if (row.win_rate > topWin) {
+          topWin = row.win_rate;
+          topHero = row;
+        }
+        rows.push(row);
+      });
+
+      state.rows = rows;
+      state.stats = {
+        dateid: dateid,
+        total: rows.length,
+        avgWin: rows.length ? winSum / rows.length : 0,
+        topWin: topWin,
+        topHero: topHero,
+      };
+      return state;
+    });
+  }
+
+  /* ---------- helpers ---------- */
+
+  function pct(n, digits) {
+    var d = digits == null ? 2 : digits;
+    return (n * 100).toFixed(d) + "%";
+  }
+
+  function winTone(rate) {
+    if (rate >= 0.52) return "high";
+    if (rate >= 0.49) return "mid";
+    return "low";
+  }
+
+  function winBarPct(rate) {
+    var n = Math.round(Math.min(100, Math.max(0, (rate - 0.4) * (100 / 0.2))));
+    return String(n);
+  }
+
+  function formatAttr(key, val) {
+    if (typeof val !== "number") return String(val);
+    if (Number.isInteger(val)) return String(val);
+    return val.toFixed(2);
+  }
+
+  function showLoading() {
+    els.rankList.innerHTML = '<div class="loading-state">加载中…</div>';
+    els.resultCount.textContent = "加载中…";
+  }
+
+  function showError(err) {
+    els.rankList.innerHTML =
+      '<div class="error-state">加载失败：' +
+      escapeHtml(String((err && err.message) || err)) +
+      "</div>";
+    els.resultCount.textContent = "加载失败";
+  }
+
+  /* ---------- derive / render ---------- */
+
+  function filteredSorted() {
+    var role = state.role;
+    var rows = state.rows.filter(function (r) {
+      if (role === "全") return true;
+      return (r.roles || []).indexOf(role) >= 0;
+    });
+
+    var key = state.sortKey;
+    var dir = state.sortDir === "asc" ? 1 : -1;
+    rows = rows.slice().sort(function (a, b) {
+      var av = a[key];
+      var bv = b[key];
+      if (av === bv) return a.name.localeCompare(b.name, "zh-Hans-CN");
+      return (av - bv) * dir;
+    });
+    return rows;
+  }
+
+  function renderStats() {
+    var s = state.stats;
+    els.statAvgWin.textContent = s.avgWin ? pct(s.avgWin) : "—";
+    els.statTopWin.textContent = s.topHero ? pct(s.topWin) : "—";
+    els.statTopHero.textContent = s.topHero ? s.topHero.name : "—";
+    els.dateChip.textContent = s.dateid || "—";
+  }
+
+  function sortIndicator() {
+    document.querySelectorAll(".col-sort").forEach(function (btn) {
+      btn.classList.remove("is-asc", "is-desc");
+      if (btn.getAttribute("data-sort") === state.sortKey) {
+        btn.classList.add(state.sortDir === "asc" ? "is-asc" : "is-desc");
+      }
+    });
+  }
+
+  function renderList() {
+    var rows = filteredSorted();
+    sortIndicator();
+    els.resultCount.textContent = "共 " + rows.length + " 位";
+
+    if (!rows.length) {
+      els.rankList.innerHTML = '<div class="empty-state">当前筛选下暂无数据</div>';
+      return;
+    }
+
+    var html = rows
+      .map(function (r, i) {
+        var rank = i + 1;
+        var tone = winTone(r.win_rate);
+        var roleChips = (r.roles || [])
+          .map(function (x) {
+            return '<span class="role-pill">' + x + "</span>";
+          })
+          .join("");
+        var subBits = [];
+        if (r.lane) subBits.push(r.lane + "路");
+        if (r.tags) subBits.push(r.tags.split("/").slice(0, 2).join(" · "));
+
+        var avatarHtml = r.avatar
+          ? '<img class="hero-avatar" src="' +
+            escapeAttr(r.avatar) +
+            '" alt="' +
+            escapeAttr(r.name) +
+            '" width="40" height="40" decoding="async" loading="lazy" />'
+          : '<div class="hero-avatar is-fallback" role="img" aria-label="' +
+            escapeAttr(r.name) +
+            '">' +
+            escapeHtml((r.name || "?").slice(0, 1)) +
+            "</div>";
+
+        return (
+          '<article class="rank-row" tabindex="0" data-id="' +
+          escapeAttr(r.hero_id) +
+          '" data-rank="' +
+          rank +
+          '">' +
+          '<span class="col-rank">' +
+          padRank(rank) +
+          "</span>" +
+          '<div class="col-hero">' +
+          avatarHtml +
+          '<div class="hero-meta">' +
+          '<p class="hero-name">' +
+          escapeHtml(r.name) +
+          "</p>" +
+          '<p class="hero-sub">' +
+          roleChips +
+          escapeHtml(subBits.join(" / ") || "式神") +
+          "</p>" +
+          "</div></div>" +
+          '<div class="metric-cell win-wrap" title="胜率">' +
+          '<span class="win-value">' +
+          pct(r.win_rate) +
+          "</span>" +
+          '<span class="win-bar tone-' +
+          tone +
+          '" aria-hidden="true"><i data-w="' +
+          winBarPct(r.win_rate) +
+          '"></i></span>' +
+          "</div>" +
+          '<div class="metric-cell" title="登场率">' +
+          pct(r.battle_rate) +
+          "</div>" +
+          '<div class="metric-cell" title="KDA">' +
+          r.kda.toFixed(1) +
+          "</div>" +
+          '<div class="metric-cell" title="场均击杀">' +
+          r.avg_kill_cnt.toFixed(2) +
+          "</div>" +
+          '<div class="mobile-metrics">' +
+          '<div class="mm"><span>胜率</span><b class="' +
+          tone +
+          '">' +
+          pct(r.win_rate, 1) +
+          "</b></div>" +
+          '<div class="mm"><span>登场</span><b>' +
+          pct(r.battle_rate, 1) +
+          "</b></div>" +
+          '<div class="mm"><span>KDA</span><b>' +
+          r.kda.toFixed(1) +
+          "</b></div>" +
+          '<div class="mm"><span>击杀</span><b>' +
+          r.avg_kill_cnt.toFixed(1) +
+          "</b></div>" +
+          "</div>" +
+          "</article>"
+        );
+      })
+      .join("");
+
+    els.rankList.innerHTML = html;
+  }
+
+  function padRank(n) {
+    if (n < 10) return "0" + n;
+    if (n < 100) return String(n);
+    return String(n);
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function escapeAttr(s) {
+    return escapeHtml(s).replace(/'/g, "&#39;");
+  }
+
+  /* ---------- detail drawer ---------- */
+
+  function openDetail(heroId) {
+    var row = state.rows.find(function (r) {
+      return r.hero_id === String(heroId);
+    });
+    if (!row) return;
+
+    els.drawerAvatar.src = row.avatar || "";
+    els.drawerAvatar.alt = row.name + "头像";
+    els.drawerTitle.textContent = row.name;
+    els.drawerRoles.textContent = (row.roles || []).join(" · ") || "式神";
+    els.drawerLane.textContent = row.lane ? "推荐路线 · " + row.lane + "路" : "式神详情";
+    els.drawerTags.textContent = row.tags ? "标签：" + row.tags : "";
+
+    var tone = winTone(row.win_rate);
+    els.drawerMetrics.innerHTML = [
+      card("胜率", pct(row.win_rate), tone),
+      card("登场率", pct(row.battle_rate), ""),
+      card("KDA", row.kda.toFixed(1), ""),
+      card("场均击杀", row.avg_kill_cnt.toFixed(2), ""),
+    ].join("");
+
+    var attrOrder = [
+      "生命值",
+      "物理伤害",
+      "攻击速度",
+      "护甲",
+      "魔抗",
+      "移动速度",
+      "魔法上限",
+      "生命恢复",
+    ];
+    var attrs = row.attrs || {};
+    var keys = attrOrder.filter(function (k) {
+      return attrs[k] != null;
+    });
+    Object.keys(attrs).forEach(function (k) {
+      if (keys.indexOf(k) < 0) keys.push(k);
+    });
+    keys = keys.slice(0, 8);
+
+    els.drawerAttrs.innerHTML = keys
+      .map(function (k) {
+        return "<li><span>" + escapeHtml(k) + "</span><b>" + formatAttr(k, attrs[k]) + "</b></li>";
+      })
+      .join("");
+
+    els.drawerBio.textContent = row.bio || "暂无传记数据。";
+    els.detailDrawer.hidden = false;
+    document.body.classList.add("is-locked");
+  }
+
+  function card(label, value, tone) {
+    var cls = tone ? ' class="' + tone + '"' : "";
+    return (
+      '<div class="m-card"><span>' +
+      escapeHtml(label) +
+      "</span><strong" +
+      cls +
+      ">" +
+      escapeHtml(value) +
+      "</strong></div>"
+    );
+  }
+
+  function closeDetail() {
+    els.detailDrawer.hidden = true;
+    document.body.classList.remove("is-locked");
+  }
+
+  /* ---------- theme ---------- */
+
+  function currentTheme() {
+    var t = document.documentElement.getAttribute("data-theme");
+    return t === "light" ? "light" : "dark";
+  }
+
+  function applyTheme(theme, persist) {
+    var t = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", t);
+    if (persist) {
+      try {
+        localStorage.setItem("theme", t);
+      } catch (e) {
+        /* ignore quota / private mode */
+      }
+    }
+    if (els.themeToggle) {
+      els.themeToggle.setAttribute(
+        "aria-label",
+        t === "light" ? "切换到深色模式" : "切换到浅色模式"
+      );
+      els.themeToggle.setAttribute("title", t === "light" ? "切换深色" : "切换浅色");
+    }
+  }
+
+  function toggleTheme() {
+    applyTheme(currentTheme() === "light" ? "dark" : "light", true);
+  }
+
+  function bindTheme() {
+    applyTheme(currentTheme(), false);
+    if (els.themeToggle) {
+      els.themeToggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleTheme();
+      });
+    }
+    var mq = window.matchMedia("(prefers-color-scheme: light)");
+    var onScheme = function (e) {
+      var saved = null;
+      try {
+        saved = localStorage.getItem("theme");
+      } catch (err) {
+        saved = null;
+      }
+      if (saved !== "light" && saved !== "dark") {
+        applyTheme(e.matches ? "light" : "dark", false);
+      }
+    };
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", onScheme);
+    } else if (typeof mq.addListener === "function") {
+      mq.addListener(onScheme);
+    }
+  }
+
+  /* ---------- events ---------- */
+
+  function bindEvents() {
+    els.modeTrigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var open = els.modeMenu.hidden;
+      els.modeMenu.hidden = !open;
+      els.modeTrigger.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+
+    els.modeMenu.addEventListener("click", function (e) {
+      var li = e.target.closest("li[data-mode]");
+      if (!li) return;
+      var mode = li.getAttribute("data-mode");
+      setMode(mode);
+      els.modeMenu.hidden = true;
+      els.modeTrigger.setAttribute("aria-expanded", "false");
+    });
+
+    document.addEventListener("click", function () {
+      els.modeMenu.hidden = true;
+      els.modeTrigger.setAttribute("aria-expanded", "false");
+    });
+
+    els.roleTabs.addEventListener("click", function (e) {
+      var btn = e.target.closest(".role-tab");
+      if (!btn) return;
+      state.role = btn.getAttribute("data-role") || "全";
+      els.roleTabs.querySelectorAll(".role-tab").forEach(function (b) {
+        b.classList.toggle("is-active", b === btn);
+      });
+      renderList();
+    });
+
+    document.querySelectorAll(".col-sort").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var key = btn.getAttribute("data-sort");
+        if (state.sortKey === key) {
+          state.sortDir = state.sortDir === "desc" ? "asc" : "desc";
+        } else {
+          state.sortKey = key;
+          state.sortDir = "desc";
+        }
+        renderList();
+      });
+    });
+
+    els.rankList.addEventListener("click", function (e) {
+      var row = e.target.closest(".rank-row");
+      if (!row) return;
+      openDetail(row.getAttribute("data-id"));
+    });
+
+    els.rankList.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      var row = e.target.closest(".rank-row");
+      if (!row) return;
+      e.preventDefault();
+      openDetail(row.getAttribute("data-id"));
+    });
+
+    els.detailDrawer.addEventListener("click", function (e) {
+      if (e.target.hasAttribute("data-close")) closeDetail();
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !els.detailDrawer.hidden) closeDetail();
+    });
+  }
+
+  function syncModeLabel() {
+    var label = MODE_LABELS[state.mode] || MODE_LABELS["-127"];
+    els.modeLabel.textContent = label;
+    els.modeMenu.querySelectorAll("li[data-mode]").forEach(function (li) {
+      li.classList.toggle("is-active", li.getAttribute("data-mode") === state.mode);
+    });
+  }
+
+  function setMode(mode) {
+    if (!MODE_LABELS[mode]) mode = "-127";
+    if (state.mode === mode) {
+      syncModeLabel();
+      return;
+    }
+    state.mode = mode;
+    localStorage.setItem("mode", mode);
+    syncModeLabel();
+    showLoading();
+    loadRank(mode)
+      .then(function () {
+        renderStats();
+        renderList();
+      })
+      .catch(showError);
+  }
+
+  function boot() {
+    bindTheme();
+    syncModeLabel();
+    bindEvents();
+    showLoading();
+
+    loadBase()
+      .then(function () {
+        return loadRank(state.mode);
+      })
+      .then(function () {
+        renderStats();
+        renderList();
+      })
+      .catch(showError);
+  }
+
+  boot();
+})();
+
+  </script>
 </body>
 </html>

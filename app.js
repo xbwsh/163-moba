@@ -22,6 +22,8 @@
 
   var els = {
     dateChip: document.getElementById("dateChip"),
+    themeToggle: document.getElementById("themeToggle"),
+    themeIcon: document.querySelector("#themeToggle .theme-icon"),
     modeTrigger: document.getElementById("modeTrigger"),
     modeMenu: document.getElementById("modeMenu"),
     modeLabel: document.querySelector("#modeTrigger .mode-label"),
@@ -433,6 +435,64 @@
     document.body.classList.remove("is-locked");
   }
 
+  /* ---------- theme ---------- */
+
+  function currentTheme() {
+    var t = document.documentElement.getAttribute("data-theme");
+    return t === "light" ? "light" : "dark";
+  }
+
+  function applyTheme(theme, persist) {
+    var t = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", t);
+    if (persist) {
+      try {
+        localStorage.setItem("theme", t);
+      } catch (e) {
+        /* ignore quota / private mode */
+      }
+    }
+    if (els.themeIcon) els.themeIcon.textContent = t === "light" ? "☀" : "☾";
+    if (els.themeToggle) {
+      els.themeToggle.setAttribute(
+        "aria-label",
+        t === "light" ? "切换到深色模式" : "切换到浅色模式"
+      );
+      els.themeToggle.setAttribute("title", t === "light" ? "切换深色" : "切换浅色");
+    }
+  }
+
+  function toggleTheme() {
+    applyTheme(currentTheme() === "light" ? "dark" : "light", true);
+  }
+
+  function bindTheme() {
+    applyTheme(currentTheme(), false);
+    if (els.themeToggle) {
+      els.themeToggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleTheme();
+      });
+    }
+    var mq = window.matchMedia("(prefers-color-scheme: light)");
+    var onScheme = function (e) {
+      var saved = null;
+      try {
+        saved = localStorage.getItem("theme");
+      } catch (err) {
+        saved = null;
+      }
+      if (saved !== "light" && saved !== "dark") {
+        applyTheme(e.matches ? "light" : "dark", false);
+      }
+    };
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", onScheme);
+    } else if (typeof mq.addListener === "function") {
+      mq.addListener(onScheme);
+    }
+  }
+
   /* ---------- events ---------- */
 
   function bindEvents() {
@@ -530,6 +590,7 @@
   }
 
   function boot() {
+    bindTheme();
     syncModeLabel();
     bindEvents();
     showLoading();
