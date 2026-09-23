@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>决战！平安京 · 式神强度榜</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-seal" aria-hidden="true">京</span>
+        <div class="brand-text">
+          <p class="brand-game">决战！平安京</p>
+          <h1>式神强度榜</h1>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="meta-date" id="dateChip">——</span>
+        <div class="mode-select" id="modeSelect">
+          <button class="mode-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" id="modeTrigger">
+            <span class="mode-label">全部模式</span>
+            <span class="mode-caret" aria-hidden="true"></span>
+          </button>
+          <ul class="mode-menu" id="modeMenu" role="listbox" hidden>
+            <li role="option" data-mode="-127">全部模式</li>
+            <li role="option" data-mode="noban">常规模式</li>
+            <li role="option" data-mode="ban_3">禁选模式</li>
+            <li role="option" data-mode="ban_4">迷雾模式</li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <section class="board">
+      <div class="board-toolbar">
+        <nav class="role-tabs" id="roleTabs" aria-label="定位筛选">
+          <button type="button" class="role-tab is-active" data-role="全">全部</button>
+          <button type="button" class="role-tab" data-role="巫">巫</button>
+          <button type="button" class="role-tab" data-role="侍">侍</button>
+          <button type="button" class="role-tab" data-role="忍">忍</button>
+          <button type="button" class="role-tab" data-role="射">射</button>
+          <button type="button" class="role-tab" data-role="守">守</button>
+          <button type="button" class="role-tab" data-role="祝">祝</button>
+        </nav>
+        <div class="board-meta">
+          <span id="resultCount">—</span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span>平均 <b id="statAvgWin">—</b></span>
+          <span class="sep" aria-hidden="true">·</span>
+          <span>最高 <b id="statTopWin">—</b> <i id="statTopHero"></i></span>
+        </div>
+      </div>
+
+      <div class="table-shell">
+        <div class="table-head" role="row">
+          <span class="col-rank">#</span>
+          <span class="col-hero">式神</span>
+          <button type="button" class="col-sort is-desc" data-sort="win_rate">胜率</button>
+          <button type="button" class="col-sort" data-sort="battle_rate">登场率</button>
+          <button type="button" class="col-sort" data-sort="kda">KDA</button>
+          <button type="button" class="col-sort" data-sort="avg_kill_cnt">场均击杀</button>
+        </div>
+
+        <div class="table-body" id="rankList" aria-live="polite">
+          <div class="loading-state">加载中…</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <p>式神资源与版权均属于网易官方，我们仅进行页面升级展示</p>
+    </footer>
+  </div>
+
+  <aside class="detail-drawer" id="detailDrawer" hidden>
+    <div class="drawer-backdrop" data-close></div>
+    <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <button type="button" class="drawer-close" data-close aria-label="关闭">×</button>
+      <div class="drawer-head">
+        <img id="drawerAvatar" src="" alt="式神头像" width="64" height="64" />
+        <div>
+          <p class="drawer-roles" id="drawerRoles"></p>
+          <h2 id="drawerTitle">—</h2>
+          <p class="drawer-lane" id="drawerLane"></p>
+        </div>
+      </div>
+      <div class="drawer-metrics" id="drawerMetrics"></div>
+      <div class="drawer-attrs">
+        <h3>基础属性</h3>
+        <ul id="drawerAttrs"></ul>
+      </div>
+      <p class="drawer-tags" id="drawerTags"></p>
+      <p class="drawer-bio" id="drawerBio"></p>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>
